@@ -21,7 +21,7 @@ spec:
       imagePullPolicy: IfNotPresent
       ports:
         - name: www
-          containerPort: 8000
+          containerPort: 80
           protocol: TCP
       volumeMounts:
         - mountPath: /homework
