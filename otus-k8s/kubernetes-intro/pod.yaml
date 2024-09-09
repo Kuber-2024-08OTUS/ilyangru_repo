@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-intro
+  namespace: homework
+spec:
+  initContainers:
+    - name: init-kube-intro
+      image: busybox
+      command:
+        - wget
+        - "-O"
+        - "/init/index.html"
+        - "https://www.cncf.io/about/who-we-are/"
+      volumeMounts:
+        - mountPath: /init/
+          name: workdir
+  containers:
+    - name: kube-intro
+      image: nginx
+      imagePullPolicy: IfNotPresent
+      ports:
+        - name: www
+          containerPort: 80
+          protocol: TCP
+      volumeMounts:
+        - mountPath: /homework
+          name: workdir
+        - mountPath: /usr/share/nginx/html
+          name: workdir
+          readOnly: true
+      workingDir: /homework
+      lifecycle:
+        preStop:
+          exec:
+            command: [ "rm /homework/index.html" ]
+  restartPolicy: Always
+  volumes:
+    - name: workdir
+      emptyDir: {}
