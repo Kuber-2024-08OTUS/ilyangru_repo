@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: homework
+  name: dp
+  labels:
+    app: deployment-demo
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: deployment-demo
+  template:
+    metadata:
+      name: dp
+      labels:
+        app: deployment-demo
+        managed-by: homework
+    spec:
+      initContainers:
+        - name: init-webserver
+          image: busybox
+          command:
+            - wget
+            - "-O"
+            - "/init/index.html"
+            - "https://www.cncf.io/about/who-we-are/"
+          volumeMounts:
+            - mountPath: /init/
+              name: workdir
+      containers:
+        - name: webserver
+          image: nginx
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: www
+              containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /homework
+              name: workdir
+            - mountPath: /usr/share/nginx/html
+              name: workdir
+              readOnly: true
+          workingDir: /homework
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "rm /homework/index.html" ]
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - "-c"
+                - "if [ -f /homework/index.html ] ; then exit 0; else exit 1; fi"
+      restartPolicy: Always
+      volumes:
+        - name: workdir
+          emptyDir: {}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: homework
+                    operator: In
+                    values:
+                      - "true"
