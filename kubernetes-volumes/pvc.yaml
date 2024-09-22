@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: homework-pvc-default
+  namespace: homework
+spec:
+  # When a PVC does not specify a storageClassName, the default StorageClass is used.
+  # Ref: https://kubernetes.io/docs/concepts/storage/storage-classes/#default-storageclass
+  storageClassName: "sc-hostpath-retain"
+  accessModes:
+    - ReadWriteOnce
+  # volumeName: homework-pv-default
+  resources:
+    requests:
+      storage: 1Gi

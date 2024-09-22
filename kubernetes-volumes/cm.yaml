@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homework-cm
+  namespace: homework
+data:
+  hello: |
+    <p>Hello from configmap</p>
