@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "quest-one.fullname" . }}
+  namespace: {{ .Values.nameSpace | default "default" }}
+  labels:
+    {{- include "quest-one.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "quest-one.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "quest-one.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "quest-one.serviceAccountName" . }}
+      initContainers:
+        - name: init-webserver
+          image: busybox
+          command:
+            - wget
+            - "-O"
+            - "/init/index.html"
+            - "https://www.cncf.io/about/who-we-are/"
+          {{- with .Values.volumeMountsInit }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        - name: init-metrics
+          image: curlimages/curl
+          command:
+            - "/bin/sh"
+            - "-c"
+            - "curl --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\" https://kubernetes.default.svc/metrics -o /init/metrics.html"
+          {{- with .Values.volumeMountsInit }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: www
+              containerPort: 80
+              protocol: TCP
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "rm /homework/index.html" ]
+          {{- if .Values.podProbes }}
+          readinessProbe:
+            httpGet:
+              port: www
+              path: /index.html
+          {{- end }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

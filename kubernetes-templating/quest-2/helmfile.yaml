@@ -1,0 +1,77 @@
+repositories:
+ - name: bitnami
+   url: https://charts.bitnami.com/bitnami
+
+releases:
+- name: kafka-dev
+  namespace: dev
+  chart: bitnami/kafka
+  set:
+  # отключить PV, в задании нет требований по ним
+  - name: controller.persistence.enabled
+    value: false
+  - name: broker.persistence.enabled
+    value: false
+  # уменьшить кво реплик (мало ресурсов в кластере)
+  - name: controller.replicaCount
+    value: 1
+  # уменьшить потребление памяти (мало ресурсов в кластере)
+  - name: heapOpts
+    value: "-Xms64m -Xmx256m"
+  - name: broker.heapOpts
+    value: "-Xms64m -Xmx257m"
+  - name: controller.heapOpts
+    value: "-Xms64m -Xmx258m"
+  # по ТЗ для dev
+  - name: broker.replicaCount
+    value: 1
+  - name: image.tag
+    value: latest
+  - name: listeners.client.protocol
+    value: PLAINTEXT
+  - name: listeners.interbroker.protocol
+    value: PLAINTEXT
+  # требуется для обновлений чарта
+  - name: sasl.interbroker.password
+    value: "**********"
+  - name: sasl.controller.password
+    value: "**********"
+  - name:  kraft.clusterId
+    value: "**********"
+
+- name: kafka-prod
+  namespace: prod
+  chart: bitnami/kafka
+  version: "25.3.5"
+  set:
+  # отключить PV, в задании нет требований по ним
+  - name: controller.persistence.enabled
+    value: false
+  - name: broker.persistence.enabled
+    value: false
+  # уменьшить кво реплик (мало ресурсов в кластере)
+  - name: controller.replicaCount
+    value: 3
+  # уменьшить потребление памяти (мало ресурсов в кластере)
+  - name: heapOpts
+    value: "-Xms64m -Xmx259m"
+  - name: broker.heapOpts
+    value: "-Xms64m -Xmx260m"
+  - name: controller.heapOpts
+    value: "-Xms64m -Xmx261m"
+  - name: broker.replicaCount
+    value: 5
+  # по ТЗ для prod
+  - name: image.tag
+    value: 3.5.2-debian-12-r26
+  - name: listeners.client.protocol
+    value: SASL_PLAINTEXT
+  - name: listeners.interbroker.protocol
+    value: SASL_PLAINTEXT
+  # требуется для обновлений чарта
+  - name: sasl.controller.password
+    value: "**********"
+  - name: sasl.interbroker.password
+    value: "**********"
+  - name:  kraft.clusterId
+    value: "**********"

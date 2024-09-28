@@ -1,0 +1,24 @@
+Get the application by running these commands:
+{{- if .Values.ingress.enabled }}
+  {{- range $host := .Values.ingress.hosts }}
+    {{- range .paths }}
+  By ingress: http://{{ $host.host }}{{ .path }}
+
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- if contains "NodePort" .Values.service.type }}
+  By NodePort:
+  export NODE_PORT=$(kubectl get --namespace  {{ .Values.nameSpace }}  -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "quest-one.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Values.nameSpace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+
+{{- end }}
+{{- if contains "ClusterIP" .Values.service.type }}
+  By ClusterIP:
+  export POD_NAME=$(kubectl get pods --namespace {{ .Values.nameSpace }} -l "app.kubernetes.io/name={{ include "quest-one.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Values.nameSpace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  kubectl --namespace {{ .Values.nameSpace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+  echo "Visit http://127.0.0.1:8080 to use your application"
+
+{{- end }}

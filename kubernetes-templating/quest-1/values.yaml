@@ -1,0 +1,47 @@
+replicaCount: 3
+nameSpace: "homework6"
+
+serviceAccount:
+  create: true
+  automount: true
+  name: "monitoring6"
+
+podProbes: true
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: "homework.otus"
+      paths:
+        - path: /(homepage[/]?|index.html|metrics.html)$
+          pathType: Exact
+  tls: []
+
+resources: {}
+
+volumes: # []
+  - name: workdir
+    emptyDir: {}
+
+volumeMounts: #[]
+  - name: workdir
+    mountPath: /homework
+  - name: workdir
+    mountPath: /usr/share/nginx/html
+    readOnly: true
+volumeMountsInit: #[]
+  - name: workdir
+    mountPath: /init/
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
