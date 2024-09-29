@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sdk-mysql-operator
+  namespace: operators
+  labels:
+    app: sdk-mysql-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sdk-mysql-operator
+  template:
+    metadata:
+      name: sdk-mysql-operator
+      labels:
+        app: sdk-mysql-operator
+    spec:
+      serviceAccountName: clad
+      containers:
+        - name: sdk-mysql-operator
+          image: ilyang/mysql-operator:v0.0.1
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rofl-mysql-operator
+  namespace: operators
+  labels:
+    app: rofl-mysql-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rofl-mysql-operator
+  template:
+    metadata:
+      name: rofl-mysql-operator
+      labels:
+        app: rofl-mysql-operator
+    spec:
+      # serviceAccountName: clad
+      serviceAccountName: rofl
+      containers:
+        - name: rofl-mysql-operator
+          image: roflmaoinmysoul/mysql-operator:1.0.0
+          imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      
