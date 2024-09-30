@@ -1,0 +1,11 @@
+apiVersion: mysql.otus.homework/v1
+kind: MySQL
+metadata:
+  name: mysql-sdk
+spec:
+  mysql:
+    rootPassword: dG9vcg==
+  storage:
+    capacity: 2G
+  
+  

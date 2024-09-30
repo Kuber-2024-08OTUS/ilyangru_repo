@@ -1,0 +1,9 @@
+apiVersion: otus.homework/v1
+kind: MySQL
+metadata:
+  name: deployment
+spec:
+  image: "mysql:lts"
+  database: "mysql_homework"
+  password: "XhhiJh7ViJBJqKx4"
+  storage_size: "1Gi"
