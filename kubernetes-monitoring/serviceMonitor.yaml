@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: deployment-demo
+  # namespace: homework
+  namespace: prometheus-operator
+spec:
+  selector:
+    matchLabels:
+      app: deployment-demo-service
+  namespaceSelector:
+    matchNames:
+      - homework
+  endpoints:
+  - targetPort: "9113"
+    path: /metrics
