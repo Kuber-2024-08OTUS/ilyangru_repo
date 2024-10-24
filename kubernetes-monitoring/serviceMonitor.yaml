@@ -2,15 +2,35 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: deployment-demo
-  # namespace: homework
-  namespace: prometheus-operator
+  #namespace: prometheus-operator
+
+  # В моей версии чарта pormetheus-operator CR prometheus в дефлотных настройках опрашивает
+  # только сервис-мониторы с установленным лейблом `release: prometheus`
+  # Proof:
+  # kubectl get prometheuses.monitoring.coreos.com prometheus-kube-prometheus-prometheus -o yaml | \
+  # grep --after-context=3 serviceMonitor
+  labels:
+      release: prometheus
+
 spec:
   selector:
     matchLabels:
       app: deployment-demo-service
-  namespaceSelector:
-    matchNames:
-      - homework
+
+  # Сервис-монитор по умолчанию опрашивает сервисы только в своем NS
+  # Если нужно дискаверить сервисы в других NS - нужно явно нацелить монитор на нужные NS
+  # или явно разрешить дискаверить все неймспейсы через `any: true`
+  # По другому у меня не сработало
+  #namespaceSelector:
+    #matchNames:
+    #  - default
+    #any: true
+
   endpoints:
-  - targetPort: "9113"
-    path: /metrics
+  - #targetPort: 9113
+    port: nginx-metrics
+    #interval: 15s
+    #path: /metrics
+    #scheme: http
+    #scrapeTimeout: 10s
+  #jobLabel: demo-deployment-sm
