@@ -14,7 +14,6 @@
     cl1s4tneea2jpq5geoom-epik   <none>
     ```
 ### Установка Loki Promtail и Grafana
-TODO: Приложить репозитарий установки, команду установки и values.yaml
 
 Добавить и обновить репозитарий установки Loki
 ```shell
