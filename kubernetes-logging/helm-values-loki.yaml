@@ -1,0 +1,151 @@
+# -- Image pull secrets for Docker images
+imagePullSecrets: []
+# -- Deployment mode lets you specify how to deploy Loki.
+# There are 3 options:
+# - SingleBinary: Loki is deployed as a single binary, useful for small installs typically without HA, up to a few tens of GB/day.
+# - SimpleScalable: Loki is deployed as 3 targets: read, write, and backend. Useful for medium installs easier to manage than distributed, up to a about 1TB/day.
+# - Distributed: Loki is deployed as individual microservices. The most complicated but most capable, useful for large installs, typically over 1TB/day.
+# There are also 2 additional modes used for migrating between deployment modes:
+# - SingleBinary<->SimpleScalable: Migrate from SingleBinary to SimpleScalable (or vice versa)
+# - SimpleScalable<->Distributed: Migrate from SimpleScalable to Distributed (or vice versa)
+# Note: SimpleScalable and Distributed REQUIRE the use of object storage.
+deploymentMode: SingleBinary
+######################################################################################################################
+#
+# Base Loki Configs including kubernetes configurations and configurations for Loki itself,
+# see below for more specifics on Loki's configuration.
+#
+######################################################################################################################
+# -- Configuration for running Loki
+# @default -- See values.yaml
+loki:
+######################################################################################################################
+  #
+  # Loki Configuration
+  #
+  # There are several ways to pass configuration to Loki, listing them here in order of our preference for how
+  # you should use this chart.
+  # 1. Use the templated value of loki.config below and the corresponding override sections which follow.
+  #    This allows us to set a lot of important Loki configurations and defaults and also allows us to maintain them
+  #    over time as Loki changes and evolves.
+  # 2. Use the loki.structuredConfig section.
+  #    This will completely override the templated value of loki.config, so you MUST provide the entire Loki config
+  #    including any configuration that we set in loki.config unless you explicitly are trying to change one of those
+  #    values and are not able to do so with the templated sections.
+  #    If you choose this approach the burden is on you to maintain any changes we make to the templated config.
+  # 3. Use an existing secret or configmap to provide the configuration.
+  #    This option is mostly provided for folks who have external processes which provide or modify the configuration.
+  #    When using this option you can specify a different name for loki.generatedConfigObjectName and configObjectName
+  #    if you have a process which takes the generated config and modifies it, or you can stop the chart from generating
+  #    a config entirely by setting loki.generatedConfigObjectName to
+  #
+
+  # -- Check https://grafana.com/docs/loki/latest/configuration/#common_config for more info on how to provide a common configuration
+  commonConfig:
+    replication_factor: 1
+  # Should authentication be enabled
+  auth_enabled: true
+  # -- Storage config. Providing this will automatically populate all necessary storage configs in the templated config.
+  storage:
+    type: s3
+    # Loki requires a bucket for chunks and the ruler. GEL requires a third bucket for the admin API.
+    # Please provide these values if you are using object storage.
+    # bucketNames:
+    #   chunks: FIXME
+    #   ruler: FIXME
+    #   admin: FIXME
+    bucketNames:
+      chunks: cluster-ychw-loki-data
+      ruler: cluster-ychw-loki-ruler
+      admin: cluster-ychw-loki-admin
+    s3:
+      endpoint: storage.yandexcloud.net
+      #region: null
+      #accessKeyId: accessKeyValueHere
+      #secretAccessKey: secretKeyValueHere
+      #signatureVersion: null
+      #s3ForcePathStyle: false
+      insecure: true
+      #http_config: {}
+  # -- Check https://grafana.com/docs/loki/latest/configuration/#schema_config for more info on how to configure schemas
+  schemaConfig:
+    configs:
+      - from: 2024-04-01
+        store: tsdb
+        object_store: s3
+        schema: v13
+        index:
+          prefix: index_
+          period: 24h
+
+# Configuration for the single binary node(s)
+singleBinary:
+  replicas: 1
+  persistence:
+    size: 5Gi
+  tolerations:
+  - key: "node-role"
+    operator: "Equal"
+    value: "infra"
+    effect: "NoSchedule"
+  nodeSelector:
+    kubernetes.io/hostname: "cl1nmo7vtmsm1b565r2f-ycyv"
+# The Loki canary pushes logs to and queries from this loki installation to test
+# that it's working correctly
+lokiCanary:
+  enabled: true
+  # -- If true, the canary will send directly to Loki via the address configured for verification --
+  # -- If false, it will write to stdout and an Agent will be needed to scrape and send the logs --
+  push: true
+  tolerations:
+  - key: "node-role"
+    operator: "Equal"
+    value: "infra"
+    effect: "NoSchedule"
+  nodeSelector:
+    kubernetes.io/hostname: "cl1nmo7vtmsm1b565r2f-ycyv"
+write:
+  replicas: 0
+read:
+  replicas: 0
+backend:
+  replicas: 0
+# -- Configuration for the `admin-api` target
+adminApi:
+  # -- Define the amount of instances
+  replicas: 1
+  tolerations:
+  - key: "node-role"
+    operator: "Equal"
+    value: "infra"
+    effect: "NoSchedule"
+  nodeSelector:
+    kubernetes.io/hostname: "cl1nmo7vtmsm1b565r2f-ycyv"
+# Configuration for the gateway
+gateway:
+  # -- Specifies whether the gateway should be enabled
+  enabled: true
+  # -- Number of replicas for the gateway
+  replicas: 1
+  tolerations:
+  - key: "node-role"
+    operator: "Equal"
+    value: "infra"
+    effect: "NoSchedule"
+  nodeSelector:
+    kubernetes.io/hostname: "cl1nmo7vtmsm1b565r2f-ycyv"
+resultsCache:
+  # -- Specifies whether memcached based results-cache should be enabled
+  enabled: false
+chunksCache:
+  # -- Amount of memory allocated to chunks-cache for object storage (in MB).
+  allocatedMemory: 256
+  # -- Maximum item memory for chunks-cache (in MB).
+  maxItemMemory: 4
+  tolerations:
+  - key: "node-role"
+    operator: "Equal"
+    value: "infra"
+    effect: "NoSchedule"
+  nodeSelector:
+    kubernetes.io/hostname: "cl1nmo7vtmsm1b565r2f-ycyv"
