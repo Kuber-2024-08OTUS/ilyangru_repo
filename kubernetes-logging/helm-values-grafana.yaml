@@ -1,0 +1,25 @@
+tolerations:
+- key: "node-role"
+  operator: "Equal"
+  value: "infra"
+  effect: "NoSchedule"
+nodeSelector:
+  kubernetes.io/hostname: "cl1nmo7vtmsm1b565r2f-ycyv"
+
+# Передать через cli параметр --set 'key=value'
+# чтобы случайно не попало в репо
+# adminPassword: ***
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Loki
+      type: loki
+      url: http://loki.default.svc.cluster.local:3100
+      access: proxy
+      isDefault: true
+      jsonData:
+        httpHeaderName1: 'X-Scope-OrgID'
+      secureJsonData:
+        httpHeaderValue1: '1'
