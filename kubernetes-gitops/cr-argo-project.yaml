@@ -28,6 +28,8 @@ spec:
     kind: Namespace
   - group: 'rbac.authorization.k8s.io'
     kind: ClusterRole
+  - group: 'rbac.authorization.k8s.io'
+    kind: ClusterRoleBinding
 
   # Allow all namespaced-scoped resources to be created, except for ResourceQuota, LimitRange, NetworkPolicy
 #  namespaceResourceBlacklist:
@@ -46,6 +48,8 @@ spec:
     kind: StatefulSet
   - group: ''
     kind: Service
+  - group: ''
+    kind: ServiceAccount
   - group: 'rbac.authorization.k8s.io'
     kind: ClusterRoleBinding
 

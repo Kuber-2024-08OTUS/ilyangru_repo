@@ -14,7 +14,7 @@ spec:
 #      - values.yaml
       valuesObject:
         nameSpace: homework-otus
-        replicaCount: 3
+        replicaCount: 2
         volumes:
           - name: workdir
             emptyDir: {}
