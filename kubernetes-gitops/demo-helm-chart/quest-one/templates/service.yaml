@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "quest-one.fullname" . }}
+  labels:
+    {{- include "quest-one.labels" . | nindent 4 }}
+  namespace: {{ .Values.nameSpace | default "default" }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: www
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "quest-one.selectorLabels" . | nindent 4 }}

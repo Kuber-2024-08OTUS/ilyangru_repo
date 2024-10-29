@@ -23,9 +23,11 @@ spec:
     name: in-cluster
 
   # Deny all cluster-scoped resources from being created, except for Namespace
-  clusterResourceWhitelist: []
-#  - group: ''
-#    kind: Namespace
+  clusterResourceWhitelist:
+  - group: ''
+    kind: Namespace
+  - group: 'rbac.authorization.k8s.io'
+    kind: ClusterRole
 
   # Allow all namespaced-scoped resources to be created, except for ResourceQuota, LimitRange, NetworkPolicy
 #  namespaceResourceBlacklist:
@@ -44,6 +46,8 @@ spec:
     kind: StatefulSet
   - group: ''
     kind: Service
+  - group: 'rbac.authorization.k8s.io'
+    kind: ClusterRoleBinding
 
   # Enables namespace orphaned resource monitoring.
   orphanedResources:
