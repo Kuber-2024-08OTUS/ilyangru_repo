@@ -1,0 +1,7 @@
+apiVersion: v2
+name: quest-one
+version: 0.1.0
+type: application
+appVersion: "latest"
+description: Simple deployment from kubernetes-security homework
+icon: "https://upload.wikimedia.org/wikipedia/commons/1/19/Otus-logo.png"

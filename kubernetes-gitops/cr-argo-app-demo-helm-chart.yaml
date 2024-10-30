@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-helm-chart
+  namespace: argocd
+spec:
+  project: otus
+  source:
+    repoURL: https://github.com/Kuber-2024-08OTUS/ilyangru_repo.git
+    targetRevision: kubernetes-gitops
+    path: kubernetes-gitops/demo-helm-chart/quest-one
+    helm:
+#      valueFiles:
+#      - values.yaml
+      valuesObject:
+        nameSpace: homework-otus
+        replicaCount: 2
+        volumes:
+          - name: workdir
+            emptyDir: {}
+        volumeMounts:
+          - name: workdir
+            mountPath: /homework
+          - name: workdir
+            mountPath: /usr/share/nginx/html
+            readOnly: true
+        volumeMountsInit:
+          - name: workdir
+            mountPath: /init/
+  destination:
+    name: in-cluster
+    namespace: homework-otus
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - ApplyOutOfSyncOnly=true
+    - CreateNamespace=true

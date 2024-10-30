@@ -1,0 +1,24 @@
+#namespaceOverride: "argocd"
+global:
+
+  # -- Default domain used by all components
+  ## Used for ingresses, certificates, SSO, notifications, etc.
+  domain: ychw.ilyang.ru
+
+  # -- Default node selector for all components
+  nodeSelector:
+    kubernetes.io/hostname: "cl1nmo7vtmsm1b565r2f-ycyv"
+
+  # -- Default tolerations for all components
+  tolerations:
+  - key: "node-role"
+    operator: "Equal"
+    value: "infra"
+    effect: "NoSchedule"
+
+configs:
+  secret:
+    # -- Bcrypt hashed admin password
+    ## Argo expects the password in the secret to be bcrypt hashed. You can create this hash with
+    ## `htpasswd -nbBC 10 "" $ARGO_PWD | tr -d ':\n' | sed 's/$2y/$2a/'`
+    argocdServerAdminPassword: "$2a$10$fAkWqVVLfRWCDl7rGFqX7elDmYAuBYbggwDwtoq0c190AhosacQBq"

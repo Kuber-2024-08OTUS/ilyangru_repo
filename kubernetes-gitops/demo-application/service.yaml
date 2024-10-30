@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-clusterip
+#  namespace: homework
+spec:
+  selector:
+    app: deployment-demo
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: www
+  type: ClusterIP
+  
